@@ -20,6 +20,17 @@ int main(int argc, char *argv[]) {
     printf("------------------------------------------------------------\n");
     printf("   ▶ 게임을 시작하려면 Enter 키를 누르세요...\n");
     printf("------------------------------------------------------------\n");
+    //step 1. initialization
+    
+    //step 2. turn play(do-while)
+    //2-1. status printing
+    //2-2. roll diee
+    //2-3. move(result)
+    //2-4 change turn, shrak move
+    
+    //step 3. game end
+    
+    
 
 
    printf("\n");
