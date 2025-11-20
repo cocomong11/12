@@ -1,50 +1,124 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include "board.h"
 
-/* run this program using the console pauser or add your own getch, system("pause") or input loop */
+#define MAX_DIE 6
+#define N_PLAYER 3
+#define MAXLENGTH 30
 
-int main(int argc, char *argv[]) {
-	srand((unsigned)(time(NULL)));
-	printf("============================================================\n");
-    printf("                   S H A R K   I S L A N D                  \n");
-    printf("============================================================\n");
-    printf("\n");
-    printf("   파도 위를 달리는 생존 레이스, <상어 아일랜드>에 오신 것을 환영합니다!\n");
-    printf("\n");
-    printf("    규칙 요약\n");
-    printf("    - 주사위를 굴려 앞으로 전진합니다.\n");
-    printf("    - 지나가는 칸에 동전이 있으면 챙깁니다.\n");
-    printf("    - 뒤에서 상어가 점점 다가옵니다...! \n");
-    printf("    - 상어에게 잡히지 않고, 동전을 가장 많이 모은 플레이어가 승리합니다!\n");
-    printf("\n");
-    printf("------------------------------------------------------------\n");
-    printf("   ▶ 게임을 시작하려면 Enter 키를 누르세요...\n");
-    printf("------------------------------------------------------------\n");
-    //step 1. initialization
-    
-    //step 2. turn play(do-while)
-    //2-1. status printing
-    //2-2. roll diee
-    //2-3. move(result)
-    //2-4 change turn, shrak move
-    
-    //step 3. game end
-    
-    
+#define PLAYERSTATUS_LIVE 0
+#define PLAYERSTATUS_DIE 1
+#define PLAYERSTATUS_END 2
+
+char player_name[N_PLAYER][MAXLENGTH];
+int player_position[N_PLAYER];
+int player_coin[N_PLAYER];
+int player_status[N_PLAYER];
+char player_statusString[3][MAXLENGTH] = {"LIVE", "DIE", "END"};
 
 
-   printf("\n");
-    printf("============================================================\n");
-    printf("                     G A M E   O V E R                      \n");
-    printf("============================================================\n");
-    printf("\n");
-    printf("   상어 아일랜드 생존 레이스가 종료되었습니다!\n");
-    printf("   결과 화면에서 최종 승자를 확인해 주세요 \n");
-    printf("\n");
-    printf("   플레이해 주셔서 감사합니다. 또 만나요! \n");
-    printf("\n");
-    printf("============================================================\n");
-
-	system("PAUSE");
-	return 0;
+int rollDie(void)
+{
+    return (rand() % MAX_DIE) + 1;
 }
+
+void printPlayerPosition(int player)
+{
+    int i;
+    for (i = 0; i < N_BOARD; i++)
+    {
+        printf("|");
+        if (i == player_position[player])
+            printf("%c", player_name[player][0]);
+        else
+        {
+            if (board_getBoardStatus(i) == BOARDSTATUS_OK)
+                printf(" ");
+            else
+                printf("X");
+        }
+    }
+    printf("|\n");
+}
+
+void printPlayerStatus(void)
+{
+    int i;
+    printf("========== PLAYER STATUS ==========\n");
+    for (i = 0; i < N_PLAYER; i++)
+    {
+        printf("%s : pos %d, coin %d, status %s\n",
+               player_name[i],
+               player_position[i],
+               player_coin[i],
+               player_statusString[player_status[i]]);
+        printPlayerPosition(i);
+    }
+    printf("===================================\n");
+}
+
+void initPlayer(void)
+{
+    int i;
+    for (i = 0; i < N_PLAYER; i++)
+    {
+        printf("Player %d name: ", i);
+        scanf("%s", player_name[i]);
+        player_position[i] = 0;
+        player_coin[i] = 0;
+        player_status[i] = PLAYERSTATUS_LIVE;
+    }
+}
+
+int main(void)
+{
+    srand((unsigned)time(NULL));
+
+    printf("============================================================\n");
+    printf("                   S H A R K   I S L A N D                  \n");
+    printf("============================================================\n\n");
+
+    board_initBoard();
+    initPlayer();
+
+    int turn = 0;
+    int die_result;
+    int pos;
+    int dummy;
+
+    while (1)   
+    {
+        board_printBoardStatus();
+        printPlayerStatus();
+
+        printf("\n%s turn! Press any number to roll die: ", player_name[turn]);
+        scanf("%d", &dummy);
+
+        die_result = rollDie();
+
+        printf("Die result = %d\n", die_result);
+
+        player_position[turn] += die_result;
+        if (player_position[turn] >= N_BOARD - 1)
+        {
+            player_position[turn] = N_BOARD - 1;
+            player_status[turn] = PLAYERSTATUS_END;
+            printf("%s reached the end!\n", player_name[turn]);
+        }
+
+        printf("%s moved to %d\n", player_name[turn], player_position[turn]);
+
+        int gained = board_getBoardCoin(player_position[turn]);
+        if (gained > 0)
+        {
+            player_coin[turn] += gained;
+            printf(">> %s gained %d coin!\n", player_name[turn], gained);
+        }
+
+        turn = (turn + 1) % N_PLAYER;
+    }
+
+    return 0;
+}
+

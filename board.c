@@ -1,66 +1,62 @@
-#if 0
-int board_initBoard(void);
-int board_getBoardStatus(int pos);
-int board_getSharkPosition(void);
-int board_stepShark(void);
-int board_getBoardCoin(int pos);
-void board_printBoardStatus(void);
-#endif
-#define N_BOARD 30
-#define BOARDSSTATUS_OK 1
-#define BOARDSTATUS_NOK 0
+#include <stdio.h>
+#include <stdlib.h>
+#include "board.h"
+
 #define N_COINPOS 12
 #define MAX_COIN 4
- 
+
 static int board_status[N_BOARD];
 static int board_coin[N_BOARD];
-static int shark_position;
 
 void board_printBoardStatus(void)
 {
-	int i;
-	printf("------------------BOARD STATUS-------------------");
-	for(i=0;i<N_BOARD;i++)
-	{
-		printf("|");
-		if (board_status[i]==BOARDSTATUS_NOK)
-		printf("X");
-		else
-		printf("O");
-		
-	}
-	printf("|\n");
-	printf("-----------------------------------------------\n");
+    int i;
+    printf("------------- BOARD STATUS -------------\n");
+    for (i = 0; i < N_BOARD; i++)
+    {
+        printf("|");
+        if (board_status[i] == BOARDSTATUS_OK)
+            printf("O");
+        else
+            printf("X");
+    }
+    printf("|\n");
 }
-int board_getBoardStatus(int pos);
+
+int board_getBoardStatus(int pos)
 {
-	return board_status[pos];
+    return board_status[pos];
 }
-int board_getBoardCOin(int pos)
+
+int board_getBoardCoin(int pos)
 {
-	return board_coin[pos];
+    int tmp = board_coin[pos];
+    board_coin[pos] = 0;  
+    return tmp;
 }
 
 int board_initBoard(void)
 {
     int i;
+
     for (i = 0; i < N_BOARD; i++)
     {
-        board_status[i] = 0;
+        board_status[i] = BOARDSTATUS_OK;
         board_coin[i] = 0;
     }
+
     for (i = 0; i < N_COINPOS; i++)
     {
-        while (1)  
+        while (1)
         {
-            int pos = rand() % N_BOARD;   
-            if (board_coin[pos] == 0)   
+            int pos = rand() % N_BOARD;
+            if (board_coin[pos] == 0)
             {
-                board_coin[pos] = (rand() % MAX_COIN) + 1;  
-
-                break; 
+                board_coin[pos] = (rand() % MAX_COIN) + 1;
+                break;
             }
         }
     }
     return 0;
 }
+
