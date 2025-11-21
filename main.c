@@ -65,6 +65,7 @@ void initPlayer(void)
     {
         printf("Enter Player %d name: ", i);
         scanf("%s", player_name[i]);
+        getchar();
         player_position[i] = 0;
         player_coin[i] = 0;
         player_status[i] = PLAYERSTATUS_LIVE;
@@ -87,6 +88,22 @@ void checkDie(void)
     }
 }
 
+int getAlivePlayer(void)
+{
+    int i;
+    int cnt = 0;
+
+    for (i = 0; i < N_PLAYER; i++)
+    {
+        if (player_status[i] == PLAYERSTATUS_LIVE ||
+            player_status[i] == PLAYERSTATUS_END)
+        {
+            cnt++;
+        }
+    }
+    return cnt;
+}
+
 int game_end(void)
 {
     int i;
@@ -98,7 +115,7 @@ int game_end(void)
             alive++;
     }
 
-    if (alive == 0) return 1; 
+    if (alive == 0) return 1;
     return 0;
 }
 
@@ -119,7 +136,6 @@ int getWinner(void)
             }
         }
     }
-
     return winner;
 }
 
@@ -127,28 +143,26 @@ int main(void)
 {
     srand((unsigned)time(NULL));
 
-    // ================= START SCREEN ======================
     printf("============================================================\n");
     printf("                   S H A R K   I S L A N D                  \n");
     printf("============================================================\n\n");
 
-
     printf("------------------------------------------------------------\n");
     printf("   ¢º Press ENTER to start the game...\n");
     printf("------------------------------------------------------------\n");
-
-    getchar(); 
     getchar();
 
+    //step 1. initialization
     board_initBoard();
     initPlayer();
 
     int turn = 0;
-    int dum;
     int die_result;
 
+    //step 2. turn play(do-while)
     do
     {
+        //2-1. status printing
         board_printBoardStatus();
         printPlayerStatus();
 
@@ -158,13 +172,16 @@ int main(void)
             continue;
         }
 
-        printf("\n%s's turn! Press any key to roll the die...\n", player_name[turn]);
-        getchar(); getchar();
+        //2-2. roll die
+        printf("\n%s's turn! Press ENTER to roll the die...\n", player_name[turn]);
+        getchar();
 
         die_result = rollDie();
         printf("Die result = %d\n", die_result);
 
+        //2-3. move(result)
         player_position[turn] += die_result;
+
         if (player_position[turn] >= N_BOARD - 1)
         {
             player_position[turn] = N_BOARD - 1;
@@ -179,30 +196,33 @@ int main(void)
             printf(">> %s collected %d coin(s)!\n", player_name[turn], gained);
         }
 
+        //2-4 change turn, shark move
         turn = (turn + 1) % N_PLAYER;
 
-        // ------------------- SHARK TURN ----------------------
         if (turn == 0)
         {
             int new_pos = board_stepShark();
             printf("\n>> The shark moved to %d!\n", new_pos);
+
             checkDie();
 
             printf("\nPress ENTER to continue to the next round...\n");
-            getchar(); getchar();
+            getchar();
         }
 
     } while (!game_end());
 
-    // ================= END SCREEN ======================
+    //step 3. game end
     printf("\n============================================================\n");
     printf("                     G A M E   O V E R                      \n");
     printf("============================================================\n\n");
 
-
     int winner = getWinner();
     printf("  Winner: %s  (Coins: %d)\n",
            player_name[winner], player_coin[winner]);
+
+    int alive = getAlivePlayer();
+    printf("  Alive Players : %d\n", alive);
 
     printf("============================================================\n");
 
